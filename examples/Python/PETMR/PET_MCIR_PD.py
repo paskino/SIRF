@@ -47,7 +47,7 @@ Options:
   --normaliseDataAndBlock           Normalise raw data and block operator by
                                     multiplying by 1./normK.
   --algorithm=<string>              Which algorithm to run [default: spdhg]
-  --numThreads=<int>                Number of threads to use [default: NUM_THREADS]
+  --numThreads=<int>                Number of threads to use
   --numSubsets=<int>                Number of physical subsets to use 
 """
 
@@ -104,7 +104,8 @@ pet.set_verbosity(int(args['--verbosity']))
 if int(args['--verbosity']) == 0:
     msg_red = pet.MessageRedirector(None, None, None)
 # Number of threads
-pet.set_max_omp_threads(args['--numThreads'])
+numThreads = args['--numThreads'] if args['--numThreads'] else NUM_THREADS
+pet.set_max_omp_threads(numThreads)
 
 
 
