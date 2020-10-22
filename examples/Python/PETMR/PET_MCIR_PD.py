@@ -104,8 +104,8 @@ pet.set_verbosity(int(args['--verbosity']))
 if int(args['--verbosity']) == 0:
     msg_red = pet.MessageRedirector(None, None, None)
 # Number of threads
-# XXX
-# CD args['--numThreads'] is unused
+pet.set_max_omp_threads(args['--numThreads'])
+
 
 
 
