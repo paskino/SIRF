@@ -49,6 +49,8 @@ Options:
   --algorithm=<string>              Which algorithm to run [default: spdhg]
   --numThreads=<int>                Number of threads to use
   --numSubsets=<int>                Number of physical subsets to use 
+  --gamma=<val>                     parameter controlling primal-dual trade-off (>1 promotes dual)
+                                    [default: 1.]
 """
 
 # SyneRBI Synergistic Image Reconstruction Framework (SIRF)
@@ -166,10 +168,10 @@ def main():
     ###########################################################################
 
     if args['--reg']=='explicit_TV':
-        [F, G, K, normK, tau, sigma, use_axpby, prob] = set_up_explicit_reconstructor(
+        [F, G, K, normK, tau, sigma, use_axpby, prob, gamma] = set_up_explicit_reconstructor(
             use_gpu, acq_models, resamplers, sinos, rands) 
     else:
-        [F, G, K, normK, tau, sigma, use_axpby, prob] = set_up_reconstructor(
+        [F, G, K, normK, tau, sigma, use_axpby, prob, gamma] = set_up_reconstructor(
             use_gpu, acq_models, resamplers, sinos, rands)
 
     ###########################################################################
@@ -183,7 +185,7 @@ def main():
     # Get algorithm
     ###########################################################################
 
-    algo, num_iter = get_algo(F, G, K, normK, tau, sigma, use_axpby, prob, outp_file,image)
+    algo, num_iter = get_algo(F, G, K, normK, tau, sigma, gamma, use_axpby, prob, outp_file,image)
 
     ###########################################################################
     # Create save call back function
@@ -516,8 +518,8 @@ def set_up_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
         if algo == 'pdhg':
             # we want the norm of the whole physical BlockOp
             normK = get_proj_norm(BlockOperator(*C),param_path)
-            sigma = 1/normK
-            tau = 1/normK
+            sigma = gamma/normK
+            tau = 1/(normK*gamma)
         elif algo == 'spdhg':
             # we want the norm of each component
             normK = get_proj_normi(BlockOperator(*C),nsub,param_path)
@@ -542,6 +544,9 @@ def set_up_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
             tmp_sigma_np[tmp_sigma_np==np.inf]=1e-5
             sigmai.fill(tmp_sigma_np)
         sigma = BlockDataContainer(*sigma)
+        # trade-off parameter
+        sigma *= gamma
+        tau *= (1/gamma)
         use_axpby = False
 
     if algo == 'spdhg':
@@ -549,7 +554,7 @@ def set_up_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
     else:
         prob = None
 
-    return [F, G, K, normK, tau, sigma, use_axpby, prob]
+    return [F, G, K, normK, tau, sigma, use_axpby, prob, gamma]
 
 def set_up_explicit_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
     """Set up reconstructor."""
@@ -561,6 +566,7 @@ def set_up_explicit_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=
     precond = True if args['--precond'] else False
     param_path = str(args['--param_path'])
     normalise = True if args['--normaliseDataAndBlock'] else False
+    gamma = float(args['--gamma'])
 
     if precond:
         raise error('Options precond and explicit TV are not yet implemented together')
@@ -612,8 +618,8 @@ def set_up_explicit_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=
             f = [KullbackLeibler(b=sino, eta=eta) for sino, eta in zip(sinos, etas)]
             f.append(ScaledFunction(data_fit,r_alpha))
             normK = np.sqrt(normProj**2 + normGrad**2)
-        sigma = 1/normK
-        tau = 1/normK
+        sigma = gamma/normK
+        tau = 1/(normK*gamma)
         prob = None
             
     elif algo == 'spdhg':
@@ -649,7 +655,7 @@ def set_up_explicit_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=
         K = BlockOperator(*C)
     use_axpby = True
 
-    return [F, G, K, normK, tau, sigma, use_axpby, prob]
+    return [F, G, K, normK, tau, sigma, use_axpby, prob, gamma]
 
 
 def PowerMethod(operator, iterations=10, x_init=None):
@@ -860,7 +866,7 @@ def get_output_filename(attn_files, normK, sigma, tau, sino_files, resamplers, u
             outp_file += "_noMotion"
     return outp_file
 
-def get_algo(F, G, K, normK, tau, sigma, use_axpby, prob, outp_file,init_image):
+def get_algo(F, G, K, normK, tau, sigma, gamma, use_axpby, prob, outp_file,init_image):
 
     # from the arguments:
     algorithm = str(args['--algorithm'])
@@ -894,6 +900,7 @@ def get_algo(F, G, K, normK, tau, sigma, use_axpby, prob, outp_file,init_image):
                 operator=K,
                 tau=tau,
                 sigma=sigma,
+                gamma=gamma,
                 x_init=init_image,
                 prob=prob,
                 use_axpby=use_axpby,
