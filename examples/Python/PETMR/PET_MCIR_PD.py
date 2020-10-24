@@ -51,6 +51,8 @@ Options:
   --numSubsets=<int>                Number of physical subsets to use 
   --gamma=<val>                     parameter controlling primal-dual trade-off (>1 promotes dual)
                                     [default: 1.]
+  --PowerMethod_iters=<val>         number of iterations for the computation of operator norms
+                                    with the power method [default: 10]
 """
 
 # SyneRBI Synergistic Image Reconstruction Framework (SIRF)
@@ -658,7 +660,7 @@ def set_up_explicit_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=
     return [F, G, K, normK, tau, sigma, use_axpby, prob, gamma]
 
 
-def PowerMethod(operator, iterations=10, x_init=None):
+def PowerMethod(operator, x_init=None):
     '''Power method to calculate iteratively the Lipschitz constant
     
     :param operator: input operator
@@ -668,6 +670,8 @@ def PowerMethod(operator, iterations=10, x_init=None):
     :param x_init: starting point for the iteration in the operator domain
     :returns: tuple with: L, list of L at each iteration, the data the iteration worked on.
     '''
+    # From the arguments
+    iterations = int(args['--PowerMethod_iters'])
     
     # Initialise random
     if x_init is None:
