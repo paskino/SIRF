@@ -850,8 +850,24 @@ def get_output_filename(attn_files, normK, sigma, tau, sino_files, resamplers, u
     regularisation = args['--reg']
     r_iters = int(args['--reg_iters'])
     r_alpha = float(args['--alpha'])
+    gamma = float(args['--gamma'])
+    nsub = int(args['--numSubsets']) if args['--numSubsets'] and algorithm=='spdhg' else 1
+    normalise = True if args['--normaliseDataAndBlock'] else False
 
     if descriptive_fname:
+        outp_file += "_Reg-" + regularisation
+        if regularisation is not None:
+            outp_file += "-alpha" + str(r_alpha)
+        outp_file += "_nGates" + str(len(sino_files))
+        outp_file += "_nSubsets" + str(nsub)
+        outp_file += '_' + algorithm
+        if not precond:
+            outp_file += "_noPrecond"
+        else:
+            outp_file += "_wPrecond"
+        outp_file += "_gamma" + str(gamma)
+        if normalise:
+            outp_file += "normalise"
         if len(attn_files) > 0:
             outp_file += "_wAC"
         if norm_file:
@@ -860,18 +876,8 @@ def get_output_filename(attn_files, normK, sigma, tau, sino_files, resamplers, u
             outp_file += "_wRands"
         if use_gpu:
             outp_file += "_wGPU"
-        if algorithm == 'pdhg':
-            if not precond:
-                outp_file += "_sigma" + str(sigma)
-                outp_file += "_tau" + str(tau)
-            else:
-                outp_file += "_wPrecond"
-        outp_file += "_Reg-" + regularisation
-        if regularisation == 'FGP_TV':
-            outp_file += "-alpha" + str(r_alpha)
+        if regularisation == 'FGP_TV':          
             outp_file += "-riters" + str(r_iters)
-        outp_file += '_' + algorithm
-        outp_file += "_nGates" + str(len(sino_files))
         if resamplers is None:
             outp_file += "_noMotion"
     return outp_file
