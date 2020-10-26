@@ -36,7 +36,7 @@ Options:
   --update_obj_fn_interval=<int>    frequency to update objective function
                                     [default: 1]
   --alpha=<val>                     regularisation strength (if used)
-                                    [default: 0.5]
+                                    [default: 0.5]      
   --reg_iters=<val>                 Number of iterations for the regularisation
                                     subproblem [default: 100]
   --precond                         Use preconditioning
@@ -446,18 +446,18 @@ def set_up_acq_models(num_ms, sinos, rands, resampled_attns, image, use_gpu):
             if ind == 0:
                 print("ASM contains attenuation...")
             asm = asm_attn
-
+                
         # Loop over physical subsets
         for k in range(nsub):
             current = k * num_ms + ind
 
             if asm:
                 acq_models[current].set_acquisition_sensitivity(asm)
-        #KT we'll set the background in the KL function below
-        #KTif len(rands) > 0:
-        #KT    acq_models[ind].set_background_term(rands[ind])
+            #KT we'll set the background in the KL function below
+            #KTif len(rands) > 0:
+            #KT    acq_models[ind].set_background_term(rands[ind])
 
-        # Set up
+            # Set up
             acq_models[current].set_up(sinos[ind], image)    
             acq_models[current].num_subsets = nsub
             acq_models[current].subset_num = k 
@@ -495,7 +495,7 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
     param_path = str(args['--param_path'])
     normalise = True if args['--normaliseDataAndBlock'] else False
     gamma = float(args['--gamma'])
-
+    
 
     if not os.path.exists(param_path):
         os.mkdir(param_path)
@@ -692,7 +692,7 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks
             prob = [1./(2 * (len(C)-1))] * (len(C)-1) + [1./2]
         # we'll let spdhg do its default stepsize implementation
         sigma = None
-        tau = None
+        tau = None        
     else:
         raise error("algorithm '{}' is not implemented".format(algo))
 
@@ -721,7 +721,7 @@ def PowerMethod(operator, x_init=None):
     '''
     # From the arguments
     iterations = int(args['--PowerMethod_iters'])
-    
+
     # Initialise random
     if x_init is None:
         x0 = operator.domain_geometry().allocate('random')
@@ -796,7 +796,7 @@ def MixedL21Norm_proximal(self, x, tau, out):
     tmp_array = tmp.as_array()
     for outi in out:
         outi_array = outi.as_array()
-        np.divide(outi_array, tmp_array, out=outi_array, where=(outi_array<>0))
+        np.divide(outi_array, tmp_array, out=outi_array, where=(outi_array!=0))
         outi.fill(outi_array)
 
 def get_proj_norm(K,param_path):
