@@ -48,7 +48,7 @@ Options:
                                     multiplying by 1./normK.
   --algorithm=<string>              Which algorithm to run [default: spdhg]
   --numThreads=<int>                Number of threads to use
-  --numSubsets=<int>                Number of physical subsets to use 
+  --numSubsets=<int>                Number of physical subsets to use [default: 1]
   --gamma=<val>                     parameter controlling primal-dual trade-off (>1 promotes dual)
                                     [default: 1.]
   --PowerMethod_iters=<val>         number of iterations for the computation of operator norms
@@ -162,7 +162,7 @@ def main():
     # Set up acquisition models (one per motion state)
     ###########################################################################
 
-    acq_models = set_up_acq_models(
+    acq_models, masks = set_up_acq_models(
         num_ms, sinos, rands, resampled_attns, image, use_gpu)
 
     ###########################################################################
@@ -171,10 +171,10 @@ def main():
 
     if args['--reg']=='explicit_TV':
         [F, G, K, normK, tau, sigma, use_axpby, prob, gamma] = set_up_explicit_reconstructor(
-            use_gpu, acq_models, resamplers, sinos, rands) 
+            use_gpu, num_ms, acq_models, resamplers, masks, sinos, rands) 
     else:
         [F, G, K, normK, tau, sigma, use_axpby, prob, gamma] = set_up_reconstructor(
-            use_gpu, acq_models, resamplers, sinos, rands)
+            use_gpu, num_ms, acq_models, resamplers, masks, sinos, rands)
 
     ###########################################################################
     # Get output filename
@@ -391,18 +391,32 @@ def resample_attn_images(num_ms, attns, trans, use_gpu, image):
 def set_up_acq_models(num_ms, sinos, rands, resampled_attns, image, use_gpu):
     """Set up acquisition models."""
     print("Setting up acquisition models...")
+
+    # From the arguments
+    algo = str(args['--algorithm'])
+    nsub = int(args['--numSubsets']) if args['--numSubsets'] and algo=='spdhg' else 1
+    norm_file = args['--norm']
+    verbosity = int(args['--verbosity'])
+  
+
     if not use_gpu:
-        acq_models = num_ms * [pet.AcquisitionModelUsingRayTracingMatrix()]
+        acq_models = [pet.AcquisitionModelUsingRayTracingMatrix() for k in range(nsub * num_ms)]
     else:
-        acq_models = num_ms * [pet.AcquisitionModelUsingNiftyPET()]
+        acq_models = [pet.AcquisitionModelUsingNiftyPET() for k in range(nsub * num_ms)]
         for acq_model in acq_models:
             acq_model.set_use_truncation(True)
-            acq_model.set_cuda_verbosity(int(args['--verbosity']))
+            acq_model.set_cuda_verbosity(verbosity)
+
+    # create masks if nsub >1
+    if nsub>1:
+        im_one = image.clone().allocate(1.)
+        masks = []
+    else:
+        masks = None
+
 
     # If present, create ASM from ECAT8 normalisation data
     asm_norm = None
-    # Norm
-    norm_file = args['--norm']
     if norm_file:
         if not path.isfile(norm_file):
             raise error("Norm file not found: " + norm_file)
@@ -415,7 +429,7 @@ def set_up_acq_models(num_ms, sinos, rands, resampled_attns, image, use_gpu):
         if resampled_attns:
             s = sinos[ind]
             ra = resampled_attns[ind]
-            am = acq_models[ind]
+            am = pet.AcquisitionModelUsingRayTracingMatrix()
             asm_attn = get_asm_attn(s,ra,am)
 
         # Get ASM dependent on attn and/or norm
@@ -432,16 +446,28 @@ def set_up_acq_models(num_ms, sinos, rands, resampled_attns, image, use_gpu):
             if ind == 0:
                 print("ASM contains attenuation...")
             asm = asm_attn
-        if asm:
-            acq_models[ind].set_acquisition_sensitivity(asm)
 
+        # Loop over physical subsets
+        for k in range(nsub):
+            current = k * num_ms + ind
+
+            if asm:
+                acq_models[current].set_acquisition_sensitivity(asm)
         #KT we'll set the background in the KL function below
         #KTif len(rands) > 0:
         #KT    acq_models[ind].set_background_term(rands[ind])
 
         # Set up
-        acq_models[ind].set_up(sinos[ind], image)
-    return acq_models
+            acq_models[current].set_up(sinos[ind], image)    
+            acq_models[current].num_subsets = nsub
+            acq_models[current].subset_num = k 
+
+            # compute masks if needed
+            if nsub>1 and ind==0:
+                mask = acq_models[current].direct(im_one)
+                masks.append(mask)
+
+    return acq_models, masks
 
 def get_asm_attn(sino, attn, acq_model):
     """Get attn ASM from sino, attn image and acq model."""
@@ -456,7 +482,7 @@ def get_asm_attn(sino, attn, acq_model):
     return asm_attn
 
 
-def set_up_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
+def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, rands=None):
     """Set up reconstructor."""
 
     # From the arguments
@@ -468,6 +494,8 @@ def set_up_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
     precond = True if args['--precond'] else False
     param_path = str(args['--param_path'])
     normalise = True if args['--normaliseDataAndBlock'] else False
+    gamma = float(args['--gamma'])
+
 
     if not os.path.exists(param_path):
         os.mkdir(param_path)
@@ -480,7 +508,9 @@ def set_up_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
     etas = rands if rands else [sino * 0 + 1e-5 for sino in sinos]
 
     # Create composition operators containing linear
-    # acquisition models and resamplers, and data fit functions
+    # acquisition models and resamplers,
+    # and create data fit functions
+    
     if nsub == 1:
         if resamplers is None:
             #KT C = [am.get_linear_acquisition_model() for am in acq_models]
@@ -493,9 +523,17 @@ def set_up_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
                     for am, res in zip(*(acq_models, resamplers))]
         fi = [KullbackLeibler(b=sino, eta=eta) for sino, eta in zip(sinos, etas)]
     else:
-        # loop over nsub
-        # TODO
-        raise error('physical subsets = {} not yet implemented'.format(nsub))
+        C = [am for am in acq_models]
+        fi = [None] * (num_ms * nsub)
+        for (k,i) in np.ndindex((nsub,num_ms)):
+            # resample if needed
+            if resamplers is not None:            
+                C[k * num_ms + i] = CompositionOperator(
+                    #KTam.get_linear_acquisition_model(),
+                    C[k * num_ms + i],
+                    res[i], preallocate=True)
+            fi[k * num_ms + i] = KullbackLeibler(b=sinos[i], eta=etas[i], mask=masks[k].as_array(),use_numba=True)
+
 
     if regularizer == "FGP_TV":
         r_tolerance = 1e-7
@@ -558,7 +596,7 @@ def set_up_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
 
     return [F, G, K, normK, tau, sigma, use_axpby, prob, gamma]
 
-def set_up_explicit_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=None):
+def set_up_explicit_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, rands=None):
     """Set up reconstructor."""
 
     # From the arguments
@@ -578,7 +616,9 @@ def set_up_explicit_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=
     etas = rands if rands else [sino * 0 + 1e-5 for sino in sinos]
 
     # Create composition operators containing linear
-    # acquisition models and resamplers
+    # acquisition models and resamplers,
+    # and create data fit functions
+
     if nsub == 1:
         if resamplers is None:
             #KT C = [am.get_linear_acquisition_model() for am in acq_models]
@@ -589,10 +629,18 @@ def set_up_explicit_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=
                     am,
                     res, preallocate=True)
                     for am, res in zip(*(acq_models, resamplers))]
+        fi = [KullbackLeibler(b=sino, eta=eta) for sino, eta in zip(sinos, etas)]
     else:
-        # loop over nsub
-        # TODO
-        raise error('physical subsets = {} not yet implemented'.format(nsub))
+        C = [am for am in acq_models]
+        fi = [None] * num_ms * nsub
+        for (k,i) in np.ndindex((nsub,num_ms)):
+            # resample if needed
+            if resamplers is not None:            
+                C[k * num_ms + i] = CompositionOperator(
+                    #KTam.get_linear_acquisition_model(),
+                    C[k * num_ms + i],
+                    res[i], preallocate=True)
+            fi[k * num_ms + i] = KullbackLeibler(b=sino[i], eta=eta[i], mask=masks[k].as_array(),use_numba=True)
 
     # define gradient
     domain_sirf = acq_models[0].domain_geometry()
@@ -635,15 +683,16 @@ def set_up_explicit_reconstructor(use_gpu, acq_models, resamplers, sinos, rands=
                     for sino, eta, normProji in zip(sinos, etas, normProj)]
             f_rs.append(ScaledFunction(data_fit,r_alpha * normGrad))
             normK = [1.] * len(C_rs)
+            prob = [1./(2 * (len(C_rs)-1))] * (len(C_rs)-1) + [1./2]
         else:
             C.append(Grad)
             f = [KullbackLeibler(b=sino, eta=eta) for sino, eta in zip(sinos, etas)]
             f.append(ScaledFunction(data_fit,r_alpha))
             normK = normProj.append(normGrad)
+            prob = [1./(2 * (len(C)-1))] * (len(C)-1) + [1./2]
         # we'll let spdhg do its default stepsize implementation
         sigma = None
         tau = None
-        prob = [1./(2 * len(C_rs)-1)] * (len(C_rs)-1) + [1./2]        
     else:
         raise error("algorithm '{}' is not implemented".format(algo))
 
