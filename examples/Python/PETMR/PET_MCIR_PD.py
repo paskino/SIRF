@@ -171,7 +171,7 @@ def main():
 
     if args['--reg']=='explicit_TV':
         [F, G, K, normK, tau, sigma, use_axpby, prob, gamma] = set_up_explicit_reconstructor(
-            use_gpu, num_ms, acq_models, resamplers, masks, sinos, rands) 
+            use_gpu, num_ms, image, acq_models, resamplers, masks, sinos, rands) 
     else:
         [F, G, K, normK, tau, sigma, use_axpby, prob, gamma] = set_up_reconstructor(
             use_gpu, num_ms, acq_models, resamplers, masks, sinos, rands)
@@ -596,7 +596,7 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
 
     return [F, G, K, normK, tau, sigma, use_axpby, prob, gamma]
 
-def set_up_explicit_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, rands=None):
+def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers, masks, sinos, rands=None):
     """Set up reconstructor."""
 
     # From the arguments
@@ -643,9 +643,7 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks
             fi[k * num_ms + i] = KullbackLeibler(b=sino[i], eta=eta[i], mask=masks[k].as_array(),use_numba=True)
 
     # define gradient
-    domain_sirf = acq_models[0].domain_geometry()
-    domain_cil = get_domain_sirf2cil(domain_sirf)
-    Grad = Grad_sirf(domain_cil, domain_sirf)
+    Grad = Gradient(image, backend='c', correlation='SpaceChannel')
     normGrad = get_grad_norm(Grad,param_path)
 
     # define data fit
@@ -838,47 +836,6 @@ def get_grad_norm(Grad,param_path):
         np.save(file_path, normG, allow_pickle=True)
     return normG
 
-class Grad_sirf(LinearOperator):
-          
-    def __init__(self, domain_cil, domain_sirf):
-        """Constructor method
-        """              
-        self._domain_geometry = domain_sirf
-        self._range_geometry = BlockGeometry(*[self._domain_geometry for _ in range(3) ] )                
-        self.domain_cil = domain_cil
-        self.x_cil = self.domain_cil.allocate()
-        self.Grad_cil = Gradient(self.domain_cil)
-        self.range_cil = self.Grad_cil.range_geometry()
-        self.gradx_cil = self.range_cil.allocate()
-        self.voxel_sizes = domain_sirf.voxel_sizes()
-
-        super(Grad_sirf, self).__init__(domain_geometry=self._domain_geometry, 
-                                       range_geometry=self._range_geometry) 
-
-    def direct(self, x, out=None):
-        x_np = x.as_array()
-        self.x_cil.fill(x_np)
-        self.Grad_cil.direct(self.x_cil, out = self.gradx_cil)
-        if out is None:
-            out = self._range_geometry.allocate()
-        for i in range(3):
-            out[i].fill(self.gradx_cil[i].as_array())           
-        return out       
-        
-    def adjoint(self, gradx, out=None):
-        for i in range(3):
-            self.gradx_cil[i].fill(gradx[i].as_array()/self.voxel_sizes[i])
-        self.Grad_cil.adjoint(self.gradx_cil, out = self.x_cil)
-        if out is None:
-            out = self._domain_geometry.allocate()
-        out.fill(self.x_cil.as_array())        
-        return out
-        
-    def domain_geometry(self):
-        return self._domain_geometry
-    
-    def range_geometry(self):
-        return self._range_geometry
 
 def get_output_filename(attn_files, normK, sigma, tau, sino_files, resamplers, use_gpu):
     """Get output filename."""
