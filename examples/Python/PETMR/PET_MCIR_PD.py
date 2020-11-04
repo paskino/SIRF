@@ -577,11 +577,16 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
     else:
         normK=None
         # this from Vaggelis notebook
-        # XXX CD I've got questions on this
-        # XXX does this works for spdhg
         tmp_tau = K.adjoint(K.range_geometry().allocate(1.)).power(-1)
         tmp_tau_np = tmp_tau.as_array()
         tmp_tau_np[tmp_tau_np==np.inf]=1e-5
+        if not resamplers is None:
+            # get the min of the backward proj without registration
+            am = acq_models[0]
+            xa = am.adjoint(am.range_geometry().allocate(1.)).as_array()
+            vmin = num_ms * np.min(xa[xa>0])
+            # replace everything above 1/vmin
+            tmp_tau_np[tmp_tau_np > (1. / vmin)] = 1. / vmin
         tau = tmp_tau*0.
         tau.fill(tmp_tau_np)
         tmp_sigma = [Ki.direct(Ki.domain_geometry().allocate(1.)).power(-1) for Ki in K]
