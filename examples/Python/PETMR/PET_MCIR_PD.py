@@ -236,7 +236,7 @@ def get_filenames(trans, sino, attn, rand):
     num_ms = len(sino_files)
     # Check some sinograms found
     if num_ms == 0:
-        raise AssertionError("No sinograms found!")
+        raise AssertionError("No sinograms found at {}!".format(sino_pattern))
     # Should have as many trans as sinos
     if len(trans_files) > 0 and num_ms != len(trans_files):
         raise AssertionError("#trans should match #sinos. "
