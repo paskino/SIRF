@@ -413,6 +413,7 @@ def set_up_acq_models(num_ms, sinos, rands, resampled_attns, image, use_gpu):
         for acq_model in acq_models:
             acq_model.set_use_truncation(True)
             acq_model.set_cuda_verbosity(verbosity)
+            acq_model.set_num_tangential_LORs(10)
 
     # create masks if nsub >1
     if nsub>1:
