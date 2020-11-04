@@ -53,6 +53,7 @@ Options:
                                     [default: 1.]
   --PowerMethod_iters=<val>         number of iterations for the computation of operator norms
                                     with the power method [default: 10]
+  --templateAcqData                 Use template acd data
 """
 
 # SyneRBI Synergistic Image Reconstruction Framework (SIRF)
@@ -112,6 +113,8 @@ if int(args['--verbosity']) == 0:
 numThreads = args['--numThreads'] 
 pet.set_max_omp_threads(numThreads)
 
+if args['--templateAcqData']:
+    template_acq_data = pet.AcquisitionData('Siemens_mMR', span=11, max_ring_diff=15, view_mash_factor=1)
 
 
 
@@ -332,6 +335,9 @@ def get_initial_estimate(sinos, use_gpu):
 
     if initial_estimate:
         image = pet.ImageData(initial_estimate)
+    elif args['--templateAcqData']:
+        image = sinos[0].create_uniform_image(0., (127, 220, 220))
+        image.initialise(dim=(127, 220, 220), vsize=(2.03125, 1.7080754, 1.7080754))
     else:
         # Create image based on ProjData
         image = sinos[0].create_uniform_image(0.0, (nxny, nxny))
