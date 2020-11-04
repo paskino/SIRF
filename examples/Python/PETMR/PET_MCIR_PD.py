@@ -47,7 +47,7 @@ Options:
   --normaliseDataAndBlock           Normalise raw data and block operator by
                                     multiplying by 1./normK.
   --algorithm=<string>              Which algorithm to run [default: spdhg]
-  --numThreads=<int>                Number of threads to use
+  --numThreads=<int>                Number of threads to use [default: 14]
   --numSubsets=<int>                Number of physical subsets to use [default: 1]
   --gamma=<val>                     parameter controlling primal-dual trade-off (>1 promotes dual)
                                     [default: 1.]
@@ -92,7 +92,7 @@ from ccpi.optimisation.operators import \
     CompositionOperator, BlockOperator, LinearOperator, Gradient, ScaledOperator
 from ccpi.plugins.regularisers import FGP_TV
 from ccpi.filters import regularisers
-from ccpi.utilities import NUM_THREADS
+#from ccpi.utilities import NUM_THREADS
 
 __version__ = '0.1.0'
 args = docopt(__doc__, version=__version__)
@@ -108,7 +108,8 @@ pet.set_verbosity(int(args['--verbosity']))
 if int(args['--verbosity']) == 0:
     msg_red = pet.MessageRedirector(None, None, None)
 # Number of threads
-numThreads = args['--numThreads'] if args['--numThreads'] else NUM_THREADS
+#numThreads = args['--numThreads'] if args['--numThreads'] else NUM_THREADS
+numThreads = args['--numThreads'] 
 pet.set_max_omp_threads(numThreads)
 
 
