@@ -590,12 +590,18 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
         tau_np = tau.as_array()
         tau_np[tau_np==0] = 1 / (10 * vmax)
         tau.fill(tau_np)
+        # save
+        np.save('{}/tau.npy'.format(param_path), tau_np, allow_pickle=True)
         tmp_sigma = [Ki.direct(Ki.domain_geometry().allocate(1.)).power(-1) for Ki in K]
         sigma = [tmp_sigmai*0. for tmp_sigmai in tmp_sigma]
+        i = 0
         for (tmp_sigmai, sigmai) in zip(tmp_sigma, sigma):
             tmp_sigma_np = tmp_sigmai.as_array()
             tmp_sigma_np[tmp_sigma_np==np.inf]=1e-5
             sigmai.fill(tmp_sigma_np)
+            # save
+            np.save('{}/sigma_{}.npy'.format(param_path,i), tau_np, allow_pickle=True)
+            i += 1
         sigma = BlockDataContainer(*sigma)
         # trade-off parameter
         sigma *= gamma
