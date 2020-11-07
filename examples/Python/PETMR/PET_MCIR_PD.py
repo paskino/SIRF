@@ -21,8 +21,8 @@ Options:
   -r <string>, --reg=<string>       regularisation ("None","FGP_TV","explicit_TV", ...)
                                     [default: None]
   -o <outp>, --outp=<outp>          output file prefix [default: recon]
-  --outpath=<string>                output folder path
-  --param_path=<string>             param folder path
+  --outpath=<string>                output folder path [default: './']
+  --param_path=<string>             param folder path [default: './']
   --nxny=<nxny>                     image x and y dimension [default: 127]
   --dxdy=<dxdy>                     image x and y spacing
                                     (default: determined by scanner)
