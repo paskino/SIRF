@@ -512,15 +512,7 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
 
     # We'll need an additive term (eta). If randoms are present, use them
     # Else, use a scaled down version of the sinogram
-    if rands:
-        for rand in rands:
-            rand_np = rand.as_array()
-            rand_np[rand==0] = 1e-5
-            rand.fill(rand_np)
-        etas = [rand for rand in rands]
-    else:
-        etas = [sino * 0 + 1e-5 for sino in sinos]
-
+    etas = rands if rands else [sino * 0 + 1e-5 for sino in sinos]
 
     # Create composition operators containing linear
     # acquisition models and resamplers,
