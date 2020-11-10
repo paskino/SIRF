@@ -600,10 +600,10 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
             tmp_np[tmp_np==0] = 10 * np.max(tmp_np)
             sigmai = Ki.range_geometry().allocate(0.)
             sigmai.fill(1/tmp_np)
-            i += 1
             sigma.append(sigmai)
             # save
-            np.save('{}/sigma_{}.npy'.format(param_path,i), tmp_sigma_np, allow_pickle=True)
+            # np.save('{}/sigma_{}.npy'.format(param_path,i), 1/tmp_np, allow_pickle=True)
+            i += 1
         sigma = BlockDataContainer(*sigma)
         # trade-off parameter
         sigma *= gamma
