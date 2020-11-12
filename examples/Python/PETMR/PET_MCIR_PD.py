@@ -103,7 +103,7 @@ args = docopt(__doc__, version=__version__)
 ###########################################################################
 
 # storage scheme
-pet.AcquisitionData.set_storage_scheme('memory')
+pet.AcquisitionData.set_storage_scheme('default')
 # Verbosity
 pet.set_verbosity(int(args['--verbosity']))
 if int(args['--verbosity']) == 0:
