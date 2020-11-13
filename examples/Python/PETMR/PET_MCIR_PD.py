@@ -538,7 +538,7 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
                 C[k * num_ms + i] = CompositionOperator(
                     #KTam.get_linear_acquisition_model(),
                     C[k * num_ms + i],
-                    res[i], preallocate=True)
+                    resamplers[i], preallocate=True)
             fi[k * num_ms + i] = KullbackLeibler(b=sinos[i], eta=etas[i], mask=masks[k].as_array(),use_numba=True)
 
 
@@ -660,8 +660,8 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers
                 C[k * num_ms + i] = CompositionOperator(
                     #KTam.get_linear_acquisition_model(),
                     C[k * num_ms + i],
-                    res[i], preallocate=True)
-            fi[k * num_ms + i] = KullbackLeibler(b=sino[i], eta=eta[i], mask=masks[k].as_array(),use_numba=True)
+                    resamplers[i], preallocate=True)
+            fi[k * num_ms + i] = KullbackLeibler(b=sinos[i], eta=etas[i], mask=masks[k].as_array(),use_numba=True)
 
     # define gradient
     Grad = Gradient(image, backend='c', correlation='SpaceChannel')
