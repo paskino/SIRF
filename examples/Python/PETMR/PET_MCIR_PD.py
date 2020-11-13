@@ -505,7 +505,7 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
     
 
     if not os.path.exists(param_path):
-        os.mkdir(param_path)
+        os.makedirs(param_path)
 
     if normalise:
         raise error('options {} and regularization={} are not yet implemented together'.format(normalise, regularizer))
@@ -960,7 +960,7 @@ def get_save_callback_function(outp_file, num_iter):
 
 
     if not os.path.exists(outpath):
-        os.mkdir(outpath)
+        os.makedirs(outpath)
     save_interval = min(save_interval, num_iter)
 
     def save_callback(save_interval, nifti, outpath, outp_file,
