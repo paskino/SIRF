@@ -204,7 +204,7 @@ def main():
 
     while True:
         algo.max_iteration += num_iter
-        algo.run(num_iter, verbose=True, very_verbose=True,
+        algo.run(num_iter, verbose=2,
              callback=save_callback)
         display_results(algo.get_output().as_array())
         # stop = input("Shall we stop? [y/n]")
