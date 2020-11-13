@@ -6,7 +6,7 @@
 mcir_dir=/home/vol05/scarf595/MCIR/
 
 loc_data=${mcir_dir}/cardiac_resp
-loc_algo=${mcid_dir}/SIRF/examples/Python/PETMR
+loc_algo=${mcir_dir}/SIRF/examples/Python/PETMR
 
 base_result=${mcir_dir}/results/
 run_name=cluster_test
