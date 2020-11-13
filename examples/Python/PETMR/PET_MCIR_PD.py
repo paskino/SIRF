@@ -500,6 +500,7 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
     param_path = str(args['--param_path'])
     normalise = True if args['--normaliseDataAndBlock'] else False
     gamma = float(args['--gamma'])
+    output_name = str(args['--outp'])
     
 
     if not os.path.exists(param_path):
@@ -560,6 +561,11 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
     F = BlockFunction(*fi)
     K = BlockOperator(*C)
 
+    if algo == 'spdhg':
+        prob = [1./ len(K)] * len(K)
+    else:
+        prob = None
+
     if not precond:
         if algo == 'pdhg':
             # we want the norm of the whole physical BlockOp
@@ -575,22 +581,43 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
         use_axpby = True
     else:
         normK=None
-        # CD take care of edge of the FOV
-        tau = K.adjoint(K.range_geometry().allocate(1.))
-        filter = pet.TruncateToCylinderProcessor()
-        filter.apply(tau)
-        backproj_np = tau.as_array()
-        vmax = np.max(backproj_np[backproj_np>0])
-        backproj_np[backproj_np==0] = 10 * vmax
-        tau_np = 1/backproj_np
-        tau.fill(tau_np)
-        # apply filter second time just to be sure
-        filter.apply(tau)
-        tau_np = tau.as_array()
-        tau_np[tau_np==0] = 1 / (10 * vmax)
+        if algo == 'pdhg':
+            tau = K.adjoint(K.range_geometry().allocate(1.))
+            # CD take care of edge of the FOV
+            filter = pet.TruncateToCylinderProcessor()
+            filter.apply(tau)
+            backproj_np = tau.as_array()
+            vmax = np.max(backproj_np[backproj_np>0])
+            backproj_np[backproj_np==0] = 10 * vmax
+            tau_np = 1/backproj_np
+            tau.fill(tau_np)
+            # apply filter second time just to be sure
+            filter.apply(tau)
+            tau_np = tau.as_array()
+            tau_np[tau_np==0] = 1 / (10 * vmax)
+        elif algo == 'spdhg':
+            taus_np = []
+            for (Ki,pi) in zip(K,prob):
+                tau = Ki.adjoint(Ki.range_geometry().allocate(1.))
+                # CD take care of edge of the FOV
+                filter = pet.TruncateToCylinderProcessor()
+                filter.apply(tau)
+                backproj_np = tau.as_array()
+                vmax = np.max(backproj_np[backproj_np>0])
+                backproj_np[backproj_np==0] = 10 * vmax
+                tau_np = 1/backproj_np
+                tau.fill(tau_np)
+                # apply filter second time just to be sure
+                filter.apply(tau)
+                tau_np = tau.as_array()
+                tau_np[tau_np==0] = 1 / (10 * vmax)
+                taus_np.append(pi * tau_np)
+            taus = np.array(taus_np)
+            tau_np = np.min(taus, axis = 0)
         tau.fill(tau_np)
         # save
-        np.save('{}/tau.npy'.format(param_path), tau_np, allow_pickle=True)
+        np.save('{}/tau_{}.npy'.format(param_path, output_name), tau_np, allow_pickle=True)
+
         i = 0
         sigma = []
         xx = K.domain_geometry().allocate(1.)
@@ -609,10 +636,6 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
         tau *= (1/gamma)
         use_axpby = False
 
-    if algo == 'spdhg':
-        prob = [1./ len(K)] * len(K)
-    else:
-        prob = None
 
     return [F, G, K, normK, tau, sigma, use_axpby, prob, gamma]
 
