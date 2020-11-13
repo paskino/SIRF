@@ -1,11 +1,23 @@
 #! /bin/bash
 
-loc_data=/home/sirfuser/data/cardiac_resp
-loc_algo=~/devel/claire/SIRF/examples/Python/PETMR
-loc_reco=~/devel/claire/cluster_test/recons
-loc_param=~/devel/claire/cluster_test/params
-                       
+# set location of data scripts and outputs
 
+# base directory
+mcir_dir=/home/vol05/scarf595/MCIR/
+
+loc_data=${mcir_dir}/cardiac_resp
+loc_algo=${mcid_dir}/SIRF/examples/Python/PETMR
+
+base_result=${mcir_dir}/results/
+run_name=cluster_test
+loc_reco=${base_result}/${run_name}/recons
+loc_param=${base_result}/${run_name}/params
+                       
+# create the run directory and get in there
+mkdir -p ${base_result}/${run_name}
+cd ${base_result}/${run_name}
+
+# launch the  python script
 python $loc_algo/PET_MCIR_PD.py             \
 -o ungated                              \
 --algorithm=pdhg                            \
@@ -25,7 +37,7 @@ python $loc_algo/PET_MCIR_PD.py             \
 --precond                                  \
 --dxdy=3.12117                             \
 --nxny=180                                 \
---numThreads=27
+--numThreads=24
 
                                                           
                                     
