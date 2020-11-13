@@ -414,12 +414,10 @@ def set_up_acq_models(num_ms, sinos, rands, resampled_attns, image, use_gpu):
             acq_model.set_cuda_verbosity(verbosity)
             acq_model.set_num_tangential_LORs(10)
 
-    # create masks if nsub >1
-    if nsub>1:
-        im_one = image.clone().allocate(1.)
-        masks = []
-    else:
-        masks = None
+    # create masks
+    im_one = image.clone().allocate(1.)
+    masks = []
+
 
 
     # If present, create ASM from ECAT8 normalisation data
@@ -469,8 +467,8 @@ def set_up_acq_models(num_ms, sinos, rands, resampled_attns, image, use_gpu):
             acq_models[current].num_subsets = nsub
             acq_models[current].subset_num = k 
 
-            # compute masks if needed
-            if nsub>1 and ind==0:
+            # compute masks 
+            if ind==0:
                 mask = acq_models[current].direct(im_one)
                 masks.append(mask)
 
@@ -528,7 +526,8 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
                     am,
                     res, preallocate=True)
                     for am, res in zip(*(acq_models, resamplers))]
-        fi = [KullbackLeibler(b=sino, eta=eta) for sino, eta in zip(sinos, etas)]
+        fi = [KullbackLeibler(b=sino, eta=eta, mask=masks[0].as_array(),use_numba=True) 
+                for sino, eta in zip(sinos, etas)]
     else:
         C = [am for am in acq_models]
         fi = [None] * (num_ms * nsub)
@@ -650,7 +649,8 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers
                     am,
                     res, preallocate=True)
                     for am, res in zip(*(acq_models, resamplers))]
-        fi = [KullbackLeibler(b=sino, eta=eta) for sino, eta in zip(sinos, etas)]
+            fi = [KullbackLeibler(b=sino, eta=eta, mask=masks[0].as_array(),use_numba=True) 
+                for sino, eta in zip(sinos, etas)]
     else:
         C = [am for am in acq_models]
         fi = [None] * num_ms * nsub
