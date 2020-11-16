@@ -52,6 +52,20 @@ class DataContainer(ABC):
     '''
     def __init__(self):
         self.handle = None
+        self._mask = None
+
+    @property
+    def mask(self):
+        return self._mask
+    @mask.setter
+    def mask(self, value):
+        if not isinstance (value, numpy.ndarray):
+            raise TypeError('Please provide a mask as numpy array')
+        if self.shape != value.shape:
+            raise ValueError('Mask shape is wrong: expected {} got {}.'\
+                .format(self.shape, value.shape))
+        self._mask = value.copy()
+
     def __del__(self):
         print("SIRF.DataContainer __del__ with handle {}.".format(self.handle))
         if self.handle is not None:
@@ -81,6 +95,7 @@ class DataContainer(ABC):
         x.handle = pysirf.cSIRF_clone(self.handle)
         check_status(x.handle)
         return x
+
     def number(self):
         '''
         Returns the number of items in the container.
@@ -91,6 +106,10 @@ class DataContainer(ABC):
         n = pyiutil.intDataFromHandle(handle)
         pyiutil.deleteDataHandle(handle)
         return n
+
+    def is_empty(self):
+        return self.number() < 1
+
     def norm(self):
         '''
         Returns the 2-norm of the container data viewed as a vector.

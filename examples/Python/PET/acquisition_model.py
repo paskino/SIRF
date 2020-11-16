@@ -73,11 +73,13 @@ def main():
     # output goes to files
 ##    msg_red = MessageRedirector('info.txt', 'warn.txt', 'errr.txt')
 
+    # raw data to be used as a template for the acquisition model
+    acq_template = AcquisitionData(raw_data_file)
+
     # create an empty image
-    image = ImageData()
-    image_size = (31, 111, 111)
-    voxel_size = (3.375, 3, 3) # voxel sizes are in mm
-    image.initialise(image_size, voxel_size)
+    image = acq_template.create_uniform_image(0.0, xy=111)
+    image_size = image.dimensions()
+    print('image size: %d by %d by %d' % image_size)
 
     # create a shape
     shape = EllipticCylinder()
@@ -112,9 +114,6 @@ def main():
         # show the phantom image
         image_array = image.as_array()
         show_2D_array('Phantom image', image_array[z,:,:])
-
-    # raw data to be used as a template for the acquisition model
-    acq_template = AcquisitionData(raw_data_file)
 
     # select acquisition model that implements the geometric
     # forward projection by a ray tracing matrix multiplication
@@ -170,6 +169,14 @@ def main():
     if show_plot:
         show_2D_array('Backprojection', back_projected_image_as_array[z,:,:])
 
+    # backproject again, this time into pre-allocated image
+    back_projected_image.fill(0.0)
+    acq_model.backward(simulated_data, 0, 4, out=back_projected_image)
+    back_projected_image_as_array = back_projected_image.as_array()
+    if show_plot:
+        msg = 'Backprojection into pre-allocated image'
+        show_2D_array(msg, back_projected_image_as_array[z,:,:])
+
     # do same with pre-smoothing (often used for resolution modelling)
     print('Using some PSF modelling for comparison')
     smoother = SeparableGaussianImageFilter()
@@ -198,7 +205,13 @@ def main():
 
     # direct is alias for the forward method for a linear AcquisitionModel
     # raises error if the AcquisitionModel is not linear.
-    acq_model.direct(image, 0, 4, simulated_data)
+    try:
+        acq_model.direct(image, 0, 4, simulated_data)
+    except error as err:
+        print('%s' % err.value)
+        print('Extracting the linear acquisition model...')
+        lin_acq_model = acq_model.get_linear_acquisition_model()
+        lin_acq_model.direct(image, 0, 4, simulated_data)
 
     if show_plot:
         # show simulated acquisition data
@@ -207,7 +220,13 @@ def main():
     
     # adjoint is an alias for the backward method for a linear AcquisitionModel
     # raises error if the AcquisitionModel is not linear.
-    back_projected_image_adj = acq_model.adjoint(simulated_data, 0, 4)
+    try:
+        back_projected_image_adj = acq_model.adjoint(simulated_data, 0, 4)
+    except error as err:
+        print('%s' % err.value)
+        print('Extracting the linear acquisition model...')
+        lin_acq_model = acq_model.get_linear_acquisition_model()
+        back_projected_image_adj = lin_acq_model.adjoint(simulated_data, 0, 4)
 
     if show_plot:
         back_projected_image_as_array_adj = back_projected_image_adj.as_array()
