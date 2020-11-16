@@ -8,7 +8,7 @@ mcir_dir=/home/vol05/scarf595/MCIR/
 loc_data=${mcir_dir}/cardiac_resp
 loc_algo=${mcir_dir}/SIRF/examples/Python/PETMR
 
-base_result=${mcir_dir}/results/
+base_result=/work3/cse/synerbi/results/
 run_name=cluster_test
 loc_reco=${base_result}/${run_name}/recons
 loc_param=${base_result}/${run_name}/params
