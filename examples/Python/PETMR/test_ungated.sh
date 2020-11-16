@@ -24,7 +24,7 @@ python $loc_algo/PET_MCIR_PD.py             \
 -r FGP_TV                                   \
 --outpath=$loc_reco                        \
 --param_path=$loc_param                    \
--e 2                                     \
+-e 200                                     \
 --update_obj_fn_interval=1                  \
 --descriptive_fname                         \
 -v 0                                        \
