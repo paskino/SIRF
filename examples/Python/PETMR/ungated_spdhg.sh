@@ -12,8 +12,8 @@ python $loc_algo/PET_MCIR_PD.py             \
 -r FGP_TV                                   \
 --outpath=$loc_reco                        \
 --param_path=$loc_param                    \
--e 2000                                     \
---update_obj_fn_interval=50                  \
+-e 500                                     \
+--update_obj_fn_interval=480                  \
 --descriptive_fname                         \
 -v 0                                        \
 -S "$loc_data/pet/STIRungated/sinospan11_f1g1d0b0.hs"   \
@@ -25,7 +25,7 @@ python $loc_algo/PET_MCIR_PD.py             \
 --precond                                  \
 --dxdy=3.12117                             \
 --nxny=180                                 \
---numSubsets=50                             \
+--numSubsets=48                             \
 --numThreads=27                             
 
 
