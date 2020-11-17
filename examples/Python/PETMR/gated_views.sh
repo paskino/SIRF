@@ -2,18 +2,18 @@
 
 loc_data=/home/sirfuser/data/cardiac_resp
 loc_algo=~/devel/claire/SIRF/examples/Python/PETMR
-loc_reco=~/devel/claire/cluster_test/recons
-loc_param=~/devel/claire/cluster_test/params
+loc_reco=~/devel/claire/gated/recons
+loc_param=~/devel/claire/gated/params
                        
 
 python $loc_algo/PET_MCIR_PD.py             \
--o gated_test_with_trans                    \
---algorithm=pdhg                            \
+-o view                                       \
+--algorithm=spdhg                            \
 -r FGP_TV                                   \
 --outpath=$loc_reco                        \
 --param_path=$loc_param                    \
--e 10                                        \
---update_obj_fn_interval=2                  \
+-e 2000                                     \
+--update_obj_fn_interval=80                \
 --descriptive_fname                         \
 -v 0                                        \
 -S "$loc_data/pet/EM_g*.hs"                  \
@@ -28,3 +28,4 @@ python $loc_algo/PET_MCIR_PD.py             \
 --dxdy=3.12117                             \
 --nxny=180                                 \
 --numThreads=27
+
