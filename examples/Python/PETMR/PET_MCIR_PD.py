@@ -91,7 +91,7 @@ from cil.optimisation.functions import \
     KullbackLeibler, BlockFunction, IndicatorBox, MixedL21Norm, ScaledFunction
 from cil.optimisation.operators import \
     CompositionOperator, BlockOperator, LinearOperator, GradientOperator, ScaledOperator
-from ccpi.plugins.ccpi_regularisation.functions import FGP_TV
+from cil.plugins.ccpi_regularisation.functions import FGP_TV
 from ccpi.filters import regularisers
 from cil.utilities.multiprocessing import NUM_THREADS
 
