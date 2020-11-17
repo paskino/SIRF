@@ -23,8 +23,8 @@ cd ${base_result}/${run_name}
 epochs=2
 update_interval=48      
 
-cp ${loc_algo}/PET_MCIR_PD.py ${loc_reco}
-cd ${loc_reco}
+cp ${loc_algo}/PET_MCIR_PD.py ${base_result}/${run_name}
+cd ${base_result}/${run_name}
 
 python PET_MCIR_PD.py                                 \
 -o ungated_spdhg                                      \
@@ -32,7 +32,7 @@ python PET_MCIR_PD.py                                 \
 -r FGP_TV                                             \
 --outpath=$loc_reco                                   \
 --param_path=$loc_param                               \
--e ${epochs}                                           \
+-e ${epochs}                                          \
 --update_obj_fn_interval=${update_interval}           \
 --descriptive_fname                                   \
 -v 0                                                  \
@@ -46,5 +46,5 @@ python PET_MCIR_PD.py                                 \
 --dxdy=3.12117                                        \
 --nxny=180                                            \
 --numSubsets=48                                       \
---numThreads=48
+--numThreads=32
 

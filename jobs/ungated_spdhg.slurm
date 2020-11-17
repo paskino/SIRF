@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-#SBATCH -n 24
+#SBATCH -n 32
 #SBATCH --exclusive 
-#SBATCH -C  "scarf18"
+#SBATCH -C  "scarf20"
 ##SBATCH --account=scddevel
 ##SBATCH --reservation=scddevel
 # SBATCH -t 06:10:00
