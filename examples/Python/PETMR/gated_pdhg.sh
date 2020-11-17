@@ -7,13 +7,13 @@ loc_param=~/devel/claire/gated/params
                        
 
 python $loc_algo/PET_MCIR_PD.py             \
--o pdhg                                       \
+-o gated_pdhg                              \
 --algorithm=pdhg                            \
 -r FGP_TV                                   \
 --outpath=$loc_reco                        \
 --param_path=$loc_param                    \
 -e 2000                                     \
---update_obj_fn_interval=100                \
+--update_obj_fn_interval=10                \
 --descriptive_fname                         \
 -v 0                                        \
 -S "$loc_data/pet/EM_g*.hs"                  \

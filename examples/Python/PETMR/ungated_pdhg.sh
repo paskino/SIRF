@@ -13,7 +13,7 @@ python $loc_algo/PET_MCIR_PD.py             \
 --outpath=$loc_reco                        \
 --param_path=$loc_param                    \
 -e 2000                                     \
---update_obj_fn_interval=50                  \
+--update_obj_fn_interval=10                  \
 --descriptive_fname                         \
 -v 0                                        \
 -S "$loc_data/pet/STIRungated/sinospan11_f1g1d0b0.hs"   \

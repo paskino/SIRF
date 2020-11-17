@@ -7,13 +7,13 @@ loc_param=~/devel/claire/gated/params
                        
 
 python $loc_algo/PET_MCIR_PD.py             \
--o view_gates                                 \
+-o view_gates_spdhg                           \
 --algorithm=spdhg                            \
 -r FGP_TV                                   \
 --outpath=$loc_reco                        \
 --param_path=$loc_param                    \
 -e 500                                      \
---update_obj_fn_interval=1000                \
+--update_obj_fn_interval=480                \
 --descriptive_fname                         \
 -v 0                                        \
 -S "$loc_data/pet/EM_g*.hs"                  \
@@ -27,6 +27,6 @@ python $loc_algo/PET_MCIR_PD.py             \
 --precond                                  \
 --dxdy=3.12117                             \
 --nxny=180                                 \
---numSubsets=50                             \
+--numSubsets=6                             \
 --numThreads=27
 
