@@ -81,22 +81,19 @@ from glob import glob
 from docopt import docopt
 import matplotlib.pyplot as plt
 import numpy as np
-# import copy 
-# copy.deepcopy(obj)
 
 from sirf.Utilities import error, show_2D_array, examples_data_path
 import sirf.Reg as reg
 import sirf.STIR as pet
-
-from cil.framework import BlockDataContainer, ImageGeometry, BlockGeometry
-from cil.optimisation.algorithms import PDHG, SPDHG
-from cil.optimisation.functions import \
+from ccpi.framework import BlockDataContainer, ImageGeometry, BlockGeometry
+from ccpi.optimisation.algorithms import PDHG, SPDHG
+from ccpi.optimisation.functions import \
     KullbackLeibler, BlockFunction, IndicatorBox, MixedL21Norm, ScaledFunction
-from cil.optimisation.operators import CompositionOperator, BlockOperator,\
-     LinearOperator, GradientOperator, ScaledOperator
-from cil.plugins.ccpi_regularisation.functions import FGP_TV
+from ccpi.optimisation.operators import \
+    CompositionOperator, BlockOperator, LinearOperator, Gradient, ScaledOperator
+from ccpi.plugins.regularisers import FGP_TV
 from ccpi.filters import regularisers
-from cil.utilities.multiprocessing import NUM_THREADS
+from ccpi.utilities.multiprocessing import NUM_THREADS
 
 __version__ = '0.1.0'
 args = docopt(__doc__, version=__version__)
@@ -690,7 +687,7 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers
             fi[k * num_ms + i] = KullbackLeibler(b=sinos[i], eta=etas[i], mask=masks[k].as_array(),use_numba=True)
 
     # define gradient
-    Grad = GradientOperator(image, backend='c', correlation='SpaceChannel')
+    Grad = Gradient(image, backend='c', correlation='SpaceChannel')
     normGrad = get_grad_norm(Grad,param_path)
 
     # define data fit
