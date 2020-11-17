@@ -7,7 +7,7 @@ loc_param=~/devel/claire/gated/params
                        
 
 python $loc_algo/PET_MCIR_PD.py             \
--o view                                       \
+-o gates_spdhg                                \
 --algorithm=spdhg                            \
 -r FGP_TV                                   \
 --outpath=$loc_reco                        \
