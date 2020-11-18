@@ -12,4 +12,4 @@ source activate sirf
 # conda list
 source ~/devel/install/bin/env_ccppetmr.sh
 
-bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/ungated_spdhg.sh
+bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/ungated_pdhg.sh
