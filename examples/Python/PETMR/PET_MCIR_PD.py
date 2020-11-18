@@ -202,20 +202,9 @@ def main():
     # Run the reconstruction
     ###########################################################################
 
-    while True:
-        algo.max_iteration += num_iter
-        algo.run(num_iter, verbose=2,
-             callback=save_callback)
-        display_results(algo.get_output().as_array())
-        # stop = input("Shall we stop? [y/n]")
-        stop = 'y'
-        print (stop)
-        if stop == 'y':
-            print ("breaking")
-            break
-    # Display results
-    display_results(algo.get_output().as_array(), slice_num=54)
-
+    # algo.run(num_iter, verbose=2, print_interval=1, callback=save_callback)
+    algo.run(num_iter, verbose=2, callback=save_callback)
+    
 
 
 
