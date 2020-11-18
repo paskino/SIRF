@@ -7,7 +7,7 @@ loc_data=${work_dir}/cardiac_resp
 loc_algo=${mcir_dir}/SIRF/examples/Python/PETMR
 
 base_result=${work_dir}/results
-run_name=ungated_spdhg_test
+run_name=ungated_spdhg
 loc_reco=${base_result}/${run_name}/recons
 loc_param=${base_result}/${run_name}/params
                        
@@ -16,12 +16,12 @@ mkdir -p ${base_result}/${run_name}
 cd ${base_result}/${run_name}
 
 # run configuration
-#epochs=500
-#update_interval=480
+epochs=500
+update_interval=480
       
 # test configuration
-epochs=2
-update_interval=48      
+#epochs=2
+#update_interval=48      
 
 cp ${loc_algo}/PET_MCIR_PD.py ${base_result}/${run_name}
 cd ${base_result}/${run_name}
