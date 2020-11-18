@@ -283,3 +283,4 @@ coverage.xml
 .vscode/
 
 results/
+jobs/slurm-*.out
