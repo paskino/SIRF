@@ -8,7 +8,7 @@ run_names=("run_gated_view_gates" "ungated_pdhg" "ungated_spdhg" "gated_pdhg" "g
 current_dir=`pwd`
 for run_name in ${run_names[@]}
 do 
-  echo "should rsync ${run_name}"
+  echo "should rsync ${base_result}/${run_name}"
   cd ${base_result}/${run_name}
   rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
   --progress recons/ \
