@@ -582,7 +582,7 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
             # we'll let spdhg do its default implementation
             sigma = None
             tau = None
-        use_axpby = True
+        use_axpby = False
     else:
         normK=None
         if algo == 'pdhg':
@@ -750,7 +750,7 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers
     else:
         F = BlockFunction(*f)
         K = BlockOperator(*C)
-    use_axpby = True
+    use_axpby = False
 
     return [F, G, K, normK, tau, sigma, use_axpby, prob, gamma]
 
