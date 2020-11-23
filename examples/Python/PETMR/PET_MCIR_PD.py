@@ -54,6 +54,7 @@ Options:
   --PowerMethod_iters=<val>         number of iterations for the computation of operator norms
                                     with the power method [default: 10]
   --templateAcqData                 Use template acd data
+  --StorageSchemeMemory             Use memory storage scheme
 """
 
 # SyneRBI Synergistic Image Reconstruction Framework (SIRF)
@@ -103,7 +104,10 @@ args = docopt(__doc__, version=__version__)
 ###########################################################################
 
 # storage scheme
-pet.AcquisitionData.set_storage_scheme('default')
+if args['--StorageSchemeMemory']:
+    pet.AcquisitionData.set_storage_scheme('memory')
+else:
+    pet.AcquisitionData.set_storage_scheme('default')
 # Verbosity
 pet.set_verbosity(int(args['--verbosity']))
 if int(args['--verbosity']) == 0:
