@@ -1,16 +1,12 @@
 #! /bin/bash
 
-# defaults
-gamma=1.0
-alpha=0.5
-while getopts ha:g: option
+while getopts ha: option
  do
  case "${option}"
  in
   a) alpha=${OPTARG};;
-  g) gamma=${OPTARG};;
   h)
-   echo "Usage: $0 -a alpha -g gamma"
+   echo "Usage: $0 -a alpha"
    exit 
    ;;
   *)
@@ -27,7 +23,7 @@ loc_algo=${mcir_dir}/SIRF/examples/Python/PETMR
 
 base_result=${work_dir}/results
 ##############    RUN NAME    ################
-run_name=gamma_${gamma}_noprecond_alpha_${alpha}_gated_gates
+run_name=precond_alpha_${alpha}_gated_gates
 
 loc_reco=${base_result}/${run_name}/recons
 loc_param=${base_result}/${run_name}/params
@@ -67,8 +63,8 @@ python PET_MCIR_PD.py                       \
 -t def                                      \
 --nifti                                     \
 --alpha=${alpha}                            \
+--precond                                   \
 --dxdy=3.12117                              \
 --nxny=180                                  \
---gamma=${gamma}                            \
---numThreads=32 2>&1 > script.log
+--numThreads=32
 

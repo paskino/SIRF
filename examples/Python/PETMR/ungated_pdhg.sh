@@ -10,7 +10,7 @@ loc_algo=${mcir_dir}/SIRF/examples/Python/PETMR
 
 base_result=${work_dir}/results
 ##############    RUN NAME    ################
-run_name=ungated_pdhg
+run_name=ungated_pdhg_5000
 
 loc_reco=${base_result}/${run_name}/recons
 loc_param=${base_result}/${run_name}/params
@@ -28,7 +28,7 @@ cd ${base_result}/${run_name}
 #epochs=2
 #update_interval=48      
 #####   RUN   ##### 
-epochs=2000
+epochs=5000
 update_interval=10
 
 python PET_MCIR_PD.py                                   \
