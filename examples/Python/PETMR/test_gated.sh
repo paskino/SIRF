@@ -7,7 +7,7 @@ loc_param=~/devel/claire/cluster_test/params
                        
 
 python $loc_algo/PET_MCIR_PD.py             \
--o gated_test_with_trans                    \
+-o gated_test_rescaled                      \
 --algorithm=pdhg                            \
 -r FGP_TV                                   \
 --outpath=$loc_reco                        \
@@ -23,8 +23,7 @@ python $loc_algo/PET_MCIR_PD.py             \
 -T "$loc_data/pet/transf_g*.nii"            \
 -t def                                    \
 --nifti                                   \
---alpha=40.0                                \
---precond                                  \
+--alpha=5.0                                \
 --dxdy=3.12117                             \
 --nxny=180                                 \
 --numThreads=27
