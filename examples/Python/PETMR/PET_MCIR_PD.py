@@ -476,6 +476,10 @@ def set_up_acq_models(num_ms, sinos, rands, resampled_attns, image, use_gpu):
                 mask = acq_models[current].direct(im_one)
                 masks.append(mask)
 
+            # rescale by number of gates
+            if num_ms > 1:
+                acq_models[current] = ScaledOperator(acq_models[current], 1./num_ms)
+
     return acq_models, masks
 
 def get_asm_attn(sino, attn, acq_model):
