@@ -45,7 +45,7 @@ cd ${base_result}/${run_name}
 #epochs=2
 #update_interval=48      
 #####   RUN   ##### 
-epochs=2000
+epochs=500
 update_interval=80
                        
 
@@ -66,9 +66,9 @@ python PET_MCIR_PD.py                       \
 -T "$loc_data/pet/transf_g*.nii"            \
 -t def                                      \
 --nifti                                     \
---alpha=${alpha}                            \
 --dxdy=3.12117                              \
 --nxny=180                                  \
+--alpha=${alpha}                            \
 --gamma=${gamma}                            \
 --numThreads=32 2>&1 > script.log
 

@@ -1,6 +1,7 @@
 #! /bin/bash
 # defaults
 gamma=1.0
+gamma=2.8284271247461903                 
 alpha=0.5
 while getopts ha:g: option
  do
@@ -44,7 +45,7 @@ cd ${base_result}/${run_name}
 #epochs=2
 #update_interval=48      
 #####   RUN   ##### 
-epochs=2000
+epochs=500
 update_interval=10
                        
 

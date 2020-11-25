@@ -54,6 +54,7 @@ Options:
   --PowerMethod_iters=<val>         number of iterations for the computation of operator norms
                                     with the power method [default: 10]
   --templateAcqData                 Use template acd data
+  --StorageSchemeMemory             Use memory storage scheme
 """
 
 # SyneRBI Synergistic Image Reconstruction Framework (SIRF)
@@ -103,7 +104,10 @@ args = docopt(__doc__, version=__version__)
 ###########################################################################
 
 # storage scheme
-pet.AcquisitionData.set_storage_scheme('default')
+if args['--StorageSchemeMemory']:
+    pet.AcquisitionData.set_storage_scheme('memory')
+else:
+    pet.AcquisitionData.set_storage_scheme('default')
 # Verbosity
 pet.set_verbosity(int(args['--verbosity']))
 if int(args['--verbosity']) == 0:
@@ -461,6 +465,10 @@ def set_up_acq_models(num_ms, sinos, rands, resampled_attns, image, use_gpu):
                 mask = acq_models[current].direct(im_one)
                 masks.append(mask)
 
+            # rescale by number of gates
+            if num_ms > 1:
+                acq_models[current] = ScaledOperator(acq_models[current], 1./num_ms)
+
     return acq_models, masks
 
 def get_asm_attn(sino, attn, acq_model):
@@ -567,7 +575,7 @@ def set_up_reconstructor(use_gpu, num_ms, acq_models, resamplers, masks, sinos, 
             # we'll let spdhg do its default implementation
             sigma = None
             tau = None
-        use_axpby = True
+        use_axpby = False
     else:
         normK=None
         if algo == 'pdhg':
@@ -661,11 +669,11 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers
                     am,
                     res, preallocate=True)
                     for am, res in zip(*(acq_models, resamplers))]
-            fi = [KullbackLeibler(b=sino, eta=eta, mask=masks[0].as_array(),use_numba=True) 
+        fi = [KullbackLeibler(b=sino, eta=eta, mask=masks[0].as_array(),use_numba=True) 
                 for sino, eta in zip(sinos, etas)]
     else:
         C = [am for am in acq_models]
-        fi = [None] * num_ms * nsub
+        fi = [None] * (num_ms * nsub)
         for (k,i) in np.ndindex((nsub,num_ms)):
             # resample if needed
             if resamplers is not None:            
@@ -690,14 +698,13 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers
             C_rs = [ScaledOperator(Ci,1/normProj) for Ci in C]
             Grad_rs = ScaledOperator(Grad,1/normGrad)
             C_rs.append(Grad_rs)
-            f_rs = [ScaledFunction(KullbackLeibler(b=1/normProj*sino, eta=1/normProj*eta),normProj) 
-                    for sino, eta in zip(sinos, etas)]
+            f_rs = [ScaledFunction(f,normProj) 
+                    for f in fi]
             f_rs.append(ScaledFunction(data_fit,r_alpha * normGrad))
             normK = np.sqrt(2)
         else:
             C.append(Grad)
-            f = [KullbackLeibler(b=sino, eta=eta) for sino, eta in zip(sinos, etas)]
-            f.append(ScaledFunction(data_fit,r_alpha))
+            fi.append(ScaledFunction(data_fit,r_alpha))
             normK = np.sqrt(normProj**2 + normGrad**2)
         sigma = gamma/normK
         tau = 1/(normK*gamma)
@@ -710,16 +717,15 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers
             C_rs = [ScaledOperator(Ci,1/normProji) for Ci, normProji in zip(C,normProj)]
             Grad_rs = ScaledOperator(Grad,1/normGrad)
             C_rs.append(Grad_rs)
-            f_rs = [ScaledFunction(KullbackLeibler(b=1/normProji*sino, eta=1/normProji*eta),normProji) 
-                    for sino, eta, normProji in zip(sinos, etas, normProj)]
+            f_rs = [ScaledFunction(f,normProji) 
+                    for f, normProji in zip(fi, normProj)]
             f_rs.append(ScaledFunction(data_fit,r_alpha * normGrad))
             normK = [1.] * len(C_rs)
             prob = [1./(2 * (len(C_rs)-1))] * (len(C_rs)-1) + [1./2]
         else:
             C.append(Grad)
-            f = [KullbackLeibler(b=sino, eta=eta) for sino, eta in zip(sinos, etas)]
-            f.append(ScaledFunction(data_fit,r_alpha))
-            normK = normProj.append(normGrad)
+            fi.append(ScaledFunction(data_fit,r_alpha))
+            normK = normProj + [normGrad]
             prob = [1./(2 * (len(C)-1))] * (len(C)-1) + [1./2]
         # we'll let spdhg do its default stepsize implementation
         sigma = None
@@ -733,9 +739,9 @@ def set_up_explicit_reconstructor(use_gpu, num_ms, image, acq_models, resamplers
         F = BlockFunction(*f_rs)
         K = BlockOperator(*C_rs)
     else:
-        F = BlockFunction(*f)
+        F = BlockFunction(*fi)
         K = BlockOperator(*C)
-    use_axpby = True
+    use_axpby = False
 
     return [F, G, K, normK, tau, sigma, use_axpby, prob, gamma]
 
@@ -861,7 +867,7 @@ def get_grad_norm(Grad,param_path):
     file_path = '{}/normGrad.npy'.format(param_path)
     if os.path.isfile(file_path):
         print('Norm file {} exists, load it'.format(file_path))
-        normG = np.load(file_path, allow_pickle=True)
+        normG = float(np.load(file_path, allow_pickle=True))
     else:
         print('Norm file {} does not exist, compute it'.format(file_path))
         normG = PowerMethod(Grad)[0]
