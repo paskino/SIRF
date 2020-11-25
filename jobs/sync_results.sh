@@ -8,9 +8,18 @@ run_names=(\
 #"alpha_0.1_gated_gates" "alpha_0.5_gated_gates" "alpha_1_gated_gates"   "alpha_5_gated_gates"  "alpha_10_gated_gates"\
 #  "alpha_15_gated_gates"  "alpha_20_gated_gates"  "alpha_25_gated_gates"  "alpha_30_gated_gates"  \
 #  "alpha_35_gated_gates"  
-  #"noprecond_alpha_5_gated_gates" 
+  "noprecond_alpha_5_gated_gates" 
   "noprecond_alpha_5_gated_pdhg" 
-  #"precond_alpha_5_gated_pdhg")
+  "precond_alpha_5_gated_pdhg"
+  "rescaled_gamma_2.8284_noprecond_alpha_0.1_gated_pdhg"
+  "rescaled_gamma_2.8284_noprecond_alpha_1.0_gated_pdhg"
+  "rescaled_gamma_2.8284_noprecond_alpha_5_gated_pdhg"
+  "rescaled_gamma_2.8284_notrans_alpha_0.1_gated_pdhg"
+  "rescaled_gamma_2.8284_notrans_alpha_1.0_gated_pdhg"
+  "rescaled_gamma_2.8284_notrans_alpha_5_gated_pdhg"
+  "rescaled_noprecond_alpha_0.1_gated_gates"
+  "rescaled_noprecond_alpha_1.0_gated_gates"
+  "rescaled_noprecond_alpha_5_gated_gates"
 )
 
 current_dir=`pwd`

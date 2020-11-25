@@ -3,14 +3,17 @@
 # defaults
 gamma=1.0
 alpha=0.5
-while getopts ha:g: option
+epochs=200
+
+while getopts ha:g:e: option
  do
  case "${option}"
  in
   a) alpha=${OPTARG};;
   g) gamma=${OPTARG};;
+  e) epochs=${OPTARG};;
   h)
-   echo "Usage: $0 -a alpha -g gamma"
+   echo "Usage: $0 -a alpha -g gamma -e epochs"
    exit 
    ;;
   *)
@@ -27,7 +30,7 @@ loc_algo=${mcir_dir}/SIRF/examples/Python/PETMR
 
 base_result=${work_dir}/results
 ##############    RUN NAME    ################
-run_name=gamma_${gamma}_noprecond_alpha_${alpha}_gated_gates
+run_name=rescaled_noprecond_alpha_${alpha}_gated_gates
 
 loc_reco=${base_result}/${run_name}/recons
 loc_param=${base_result}/${run_name}/params
@@ -45,7 +48,6 @@ cd ${base_result}/${run_name}
 #epochs=2
 #update_interval=48      
 #####   RUN   ##### 
-epochs=500
 update_interval=80
                        
 

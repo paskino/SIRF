@@ -224,7 +224,7 @@ def get_filenames(trans, sino, attn, rand):
     sino_files = sorted(glob(sino_pattern))
     attn_files = sorted(glob(attn_pattern))
     rand_files = sorted(glob(rand_pattern))
-
+    
     num_ms = len(sino_files)
     # Check some sinograms found
     if num_ms == 0:
@@ -250,7 +250,7 @@ def get_filenames(trans, sino, attn, rand):
 
 def read_files(trans_files, sino_files, attn_files, rand_files, trans_type):
     """Read files."""
-    if not trans_files:
+    if trans_files == []:
         trans = None
     else:
         if trans_type == "tm":
