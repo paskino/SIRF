@@ -5,20 +5,21 @@
 #SBATCH -C  "scarf20"
 ##SBATCH --account=scddevel
 ##SBATCH --reservation=scddevel
-# SBATCH -t 7-0
+#SBATCH -t 7-00:00
 
 # defaults
-gamma=1.
-alpha=1.
-epochs=2000
+gamma=1.0
+alpha=0.5
+epochs=200
 
-while getopts ha:g:e: option
+while getopts ha:g:e:i: option
  do
  case "${option}"
  in
   a) alpha=${OPTARG};;
   g) gamma=${OPTARG};;
   e) epochs=${OPTARG};;
+  i) initial=${OPTARG};;
   h)
    echo "Usage: $0 -a alpha -g gamma -e epochs"
    exit 
@@ -30,12 +31,9 @@ while getopts ha:g:e: option
  esac
 done
 
-
-
-
 module purge
 source activate sirf
 # conda list
 source ~/devel/install/bin/env_ccppetmr.sh
 
-bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/ungated_pdhg.sh -a ${alpha} -e ${epochs} -g ${gamma}
+bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/rebin_gated_gates.sh -a ${alpha} -e ${epochs} -g ${gamma} -i ${initial}

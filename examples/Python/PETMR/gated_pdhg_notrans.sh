@@ -63,7 +63,7 @@ python PET_MCIR_PD.py                       \
 -S "$loc_data/pet/EM_g*.hs"                  \
 -R "$loc_data/pet/total_background_g*.hs"      \
 -n "$loc_data/pet/NORM.n.hdr"                   \
--a "$loc_data/pet/MU.hv"                \
+-a "$loc_data/pet/MU_g*.nii"                \
 --nifti                                   \
 --alpha=${alpha}                                \
 --dxdy=3.12117                             \
