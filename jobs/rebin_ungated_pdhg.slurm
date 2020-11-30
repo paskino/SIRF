@@ -5,12 +5,13 @@
 #SBATCH -C  "scarf20"
 ##SBATCH --account=scddevel
 ##SBATCH --reservation=scddevel
-#SBATCH -t 7-00:00
+# SBATCH -t 7-0
 
 # defaults
 gamma=1.0
 alpha=0.5
 epochs=200
+transform="pet/transf_g*.nii"
 
 while getopts ha:g:e:i:t: option
  do
@@ -32,9 +33,12 @@ while getopts ha:g:e:i:t: option
  esac
 done
 
+
+
+
 module purge
 source activate sirf
 # conda list
 source ~/devel/install/bin/env_ccppetmr.sh
 
-bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/rebin_gated_gates.sh -a ${alpha} -e ${epochs} -g ${gamma} -t ${transform} -i ${initial} 
+bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/rebin_ungated_pdhg.sh -a ${alpha} -e ${epochs} -g ${gamma}

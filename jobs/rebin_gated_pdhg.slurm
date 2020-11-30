@@ -37,4 +37,4 @@ source activate sirf
 # conda list
 source ~/devel/install/bin/env_ccppetmr.sh
 
-bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/rebin_gated_gates.sh -a ${alpha} -e ${epochs} -g ${gamma} -t ${transform} -i ${initial} 
+bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/rebin_gated_pdhg.sh -a ${alpha} -e ${epochs} -g ${gamma} -t ${transform} -i ${initial} 

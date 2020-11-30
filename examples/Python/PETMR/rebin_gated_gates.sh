@@ -4,8 +4,9 @@
 gamma=1.0
 alpha=0.5
 epochs=200
+transform="pet/transf_g*.nii"
 
-while getopts ha:g:e:i: option
+while getopts ha:g:e:i:t: option
  do
  case "${option}"
  in
@@ -13,6 +14,7 @@ while getopts ha:g:e:i: option
   g) gamma=${OPTARG};;
   e) epochs=${OPTARG};;
   i) initial=${OPTARG};;
+  t) transform=${OPTARG};;
   h)
    echo "Usage: $0 -a alpha -g gamma -e epochs"
    exit 
@@ -37,6 +39,11 @@ run_name=rebin_initial_rescaled_gamma_${gamma}_noprecond_alpha_${alpha}_gated_ga
 else
 run_name=rebin_noinitial_rescaled_gamma_${gamma}_noprecond_alpha_${alpha}_gated_gates
 fi
+if [ ${transform} == "pet_space_def*.nii" ] 
+then run_name="new_motion_${run_name}"
+fi
+
+
 loc_reco=${base_result}/${run_name}/recons
 loc_param=${base_result}/${run_name}/params
                        
@@ -71,7 +78,7 @@ python PET_MCIR_PD.py                       \
 -R "$loc_data/pet/total_background_g*.hs"   \
 -n "$loc_data/pet/NORM.n.hdr"               \
 -a "$loc_data/pet/MU_g*.nii"                \
--T "$loc_data/pet/transf_g*.nii"            \
+-T "$loc_data/${transform}"                 \
 -t def                                      \
 --nifti                                     \
 --dxdy=3.12117                              \
@@ -97,7 +104,7 @@ python PET_MCIR_PD.py                       \
 -R "$loc_data/pet/total_background_g*.hs"   \
 -n "$loc_data/pet/NORM.n.hdr"               \
 -a "$loc_data/pet/MU_g*.nii"                \
--T "$loc_data/pet/transf_g*.nii"            \
+-T "$loc_data/${transform}"                 \
 -t def                                      \
 --nifti                                     \
 --dxdy=3.12117                              \
