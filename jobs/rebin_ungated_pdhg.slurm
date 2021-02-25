@@ -37,8 +37,14 @@ done
 
 
 module purge
-source activate sirf
-# conda list
-source ~/devel/install/bin/env_ccppetmr.sh
+# source activate sirf
+# # conda list
+# source ~/devel/install/bin/env_ccppetmr.sh
+# build in Feb2021
+module load GCC/8.1.0-2.30
 
-bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/rebin_ungated_pdhg.sh -a ${alpha} -e ${epochs} -g ${gamma}
+source activate mcir
+source /work3/cse/synerbi/mcir_build/install/bin/env_sirf.sh
+
+# bash /home/vol05/scarf595/MCIR/SIRF/examples/Python/PETMR/rebin_ungated_pdhg.sh -a ${alpha} -e ${epochs} -g ${gamma}
+/work3/cse/synerbi/mcir_build/SIRF-Contribs/src/Python/sirf/contrib/MCIR/rebin_gated_pdhg.sh -a ${alpha} -g ${gamma} -e ${epochs}
