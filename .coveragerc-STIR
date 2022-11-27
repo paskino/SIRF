@@ -1,0 +1,6 @@
+[run]
+data_file = .coverage-STIR
+[paths]
+source =
+    src/xSTIR/pSTIR
+    /home/sirfuser/devel/install/python/sirf

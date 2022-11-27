@@ -1,0 +1,6 @@
+[run]
+data_file = .coverage-Reg
+[paths]
+source =
+    src/Registration/pReg
+    /home/sirfuser/devel/install/python/sirf

@@ -4,5 +4,6 @@ matplotlib --only-binary=matplotlib
 docopt
 psutil
 pytest
+pytest-cov
 deprecation
 nibabel  # optional

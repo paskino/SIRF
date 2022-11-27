@@ -1,6 +1,6 @@
 #========================================================================
 # Copyright 2017 - 2021 Science Technology Facilities Council
-# Copyright 2017 - 2021 University College London
+# Copyright 2017 - 2022 University College London
 #
 # This file is part of the SyneRBI Synergistic Image Reconstruction Framework (SIRF) SuperBuild.
 #
@@ -17,10 +17,8 @@
 # limitations under the License.
 #
 #=========================================================================
-# old line for nosetests. I've kept it here for when we'd enable coverage again
-# COMMAND ${Python_EXECUTABLE} -m nose --with-coverage --cover-package=sirf.Gadgetron src/xGadgetron/pGadgetron/ ${exclude_tests}
 add_test(NAME MR_TESTS_PYTHON
-  COMMAND ${Python_EXECUTABLE} -m pytest
+  COMMAND ${Python_EXECUTABLE} -m pytest --cov=sirf.Gadgetron --cov-config=.coveragerc-Gadgetron src/xGadgetron/pGadgetron/
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 add_test(NAME MR_DEMOS_PYTHON
   COMMAND ${Python_EXECUTABLE} run_all.py --non-interactive

@@ -17,11 +17,9 @@
 # limitations under the License.
 #
 #=========================================================================
-# old line for nosetests. I've kept it here for when we'd enable coverage again
-#  COMMAND ${Python_EXECUTABLE} -m nose --with-coverage --cover-package=sirf.STIR src/xSTIR/pSTIR ${exclude_tests}
 
 add_test(NAME PET_TESTS_PYTHON
-  COMMAND ${Python_EXECUTABLE} -m pytest
+  COMMAND ${Python_EXECUTABLE} -m pytest --cov=sirf.STIR --cov-config=.coveragerc-STIR src/xSTIR/pSTIR
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 #add_test(NAME PET_DEMOS_PYTHON
 #  COMMAND ${PYTHON_EXECUTABLE} run_all.py --non-interactive
