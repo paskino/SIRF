@@ -117,3 +117,11 @@ jobs:
       shell: bash
       run: |
           bash -ev ${GITHUB_WORKSPACE}/SIRF-SuperBuild/docker/ctest_sirf.sh
+          source ~/virtualenv/bin/activate
+          python -m coverage combine .coverage-*
+          python -m coverage report
+          
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}

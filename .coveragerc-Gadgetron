@@ -4,3 +4,4 @@ data_file = .coverage-Gadgetron
 source =
     src/xGadgetron/pGadgetron/
     /home/sirfuser/devel/install/python/sirf
+    /home/runner/install/python/sirf
