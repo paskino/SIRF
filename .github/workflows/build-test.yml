@@ -126,13 +126,13 @@ jobs:
           coverage combine .coverage-*
           coverage report
           ls -a
-          
+          strings .coverage
           
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       with:
         parallel: true
-        flag-name: Unit Test
+        flag-name: python test
         debug: true
 
   coveralls_finish:
