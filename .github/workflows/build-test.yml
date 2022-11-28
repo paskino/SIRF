@@ -125,9 +125,6 @@ jobs:
           source ~/virtualenv/bin/activate
           coverage combine .coverage-*
           coverage report
-          ls -a
-          strings .coverage
-          
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       with:

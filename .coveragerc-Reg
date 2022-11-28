@@ -1,5 +1,7 @@
 [run]
 data_file = .coverage-Reg
+relative_files = True
+source = sirf.Reg
 [paths]
 source =
     src/Registration/pReg

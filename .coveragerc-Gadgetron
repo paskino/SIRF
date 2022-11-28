@@ -1,5 +1,7 @@
 [run]
 data_file = .coverage-Gadgetron
+relative_files = True
+source = sirf.Gadgetron
 [paths]
 source =
     src/xGadgetron/pGadgetron/
