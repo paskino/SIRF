@@ -84,7 +84,7 @@ wrongIntParameterValue
 (const char* name, int value, const char* file, int line)
 {
 	char buff[32];
-	sprintf(buff, "%d", value);
+	snprintf(buff, sizeof(buff), "%d", value);
 	return wrongParameterValue(name, buff, file, line);
 }
 
@@ -93,7 +93,7 @@ wrongFloatParameterValue
 (const char* name, float value, const char* file, int line)
 {
 	char buff[32];
-	sprintf(buff, "%f", value);
+	snprintf(buff, sizeof(buff), "%f", value);
 	return wrongParameterValue(name, buff, file, line);
 }
 

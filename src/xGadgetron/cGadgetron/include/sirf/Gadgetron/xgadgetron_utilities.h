@@ -55,9 +55,9 @@ namespace sirf {
 			long long int ms = xGadgetronUtilities::milliseconds();
 			calls++;
 #ifdef _MSC_VER
-			sprintf_s(buff, 128, "tmp_%d_%lld.h5", calls, ms);
+			snprintf_s(buff, 128, "tmp_%d_%lld.h5", calls, ms);
 #else
-			sprintf(buff, "tmp_%d_%lld.h5", calls, ms);
+			snprintf(buff, sizeof(buff), "tmp_%d_%lld.h5", calls, ms);
 #endif
 			return std::string(buff);
 		}

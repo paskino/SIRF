@@ -1392,7 +1392,7 @@ void BSplineTransformation::SetLinearEnergyWeight( double linearEnergyWeightIn )
   if ( linearEnergyWeightIn < 0.f )
   {
     char msg[200];
-    sprintf( msg, "Linear energy weight has to be positive." );
+    snprintf( msg, sizeof(msg), "Linear energy weight has to be positive." );
     nmm_print_error( msg );
     nmm_exit( 1, __FILE__, __LINE__ );
   }
@@ -1442,7 +1442,7 @@ void BSplineTransformation::SetBendingEnergyWeight( double bendingEnergyWeightIn
   if (bendingEnergyWeightIn < 0.f)
   {
     char msg[200];
-    sprintf( msg, "Linear energy weight has to be positive." );
+    snprintf( msg, sizeof(msg), "Linear energy weight has to be positive." );
     nmm_print_error( msg );
     nmm_exit( 1, __FILE__, __LINE__ );
   }

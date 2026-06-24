@@ -72,7 +72,7 @@ namespace sirf {
 			char buff[32];
 			long long int ms = milliseconds();
 			calls++;
-			sprintf(buff, "tmp_%d_%lld", calls, ms);
+			snprintf(buff, sizeof(buff), "tmp_%d_%lld", calls, ms);
 			return std::string(buff);
 		}
 	};
