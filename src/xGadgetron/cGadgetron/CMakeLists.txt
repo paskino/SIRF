@@ -123,7 +123,7 @@ target_link_libraries(cgadgetron PUBLIC iutilities csirf)
 target_link_libraries(cgadgetron PUBLIC Boost::system Boost::filesystem Boost::thread Boost::date_time Boost::chrono)
 
 target_link_libraries(cgadgetron PUBLIC ISMRMRD::ISMRMRD)
-target_link_libraries(cgadgetron PUBLIC "${FFTW3_LIBRARIES}")
+target_link_libraries(cgadgetron PUBLIC ${FFTW3_LIBRARIES})
 
 if(GADGETRON_TOOLBOXES_AVAILABLE)
     target_link_libraries(cgadgetron PUBLIC ${GT_LIBS})

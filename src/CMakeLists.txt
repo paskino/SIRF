@@ -29,6 +29,22 @@ endmacro()
 ADD_SUBDIRECTORY(iUtilities)
 #ADD_SUBDIRECTORY(common)
 
+# Some imported targets (notably via STIR/ITK) propagate bare -lfftw* flags.
+# Ensure link-time search paths are available for all subdirectories/targets.
+set(_sirf_link_dirs)
+if (DEFINED ENV{CONDA_PREFIX} AND EXISTS "$ENV{CONDA_PREFIX}/lib")
+  list(APPEND _sirf_link_dirs "$ENV{CONDA_PREFIX}/lib")
+endif()
+foreach(_pfx ${CMAKE_PREFIX_PATH})
+  if (EXISTS "${_pfx}/lib")
+    list(APPEND _sirf_link_dirs "${_pfx}/lib")
+  endif()
+endforeach()
+list(REMOVE_DUPLICATES _sirf_link_dirs)
+if (_sirf_link_dirs)
+  link_directories(${_sirf_link_dirs})
+endif()
+
 
 ##########################################################################
 #                              Gadgetron                                 #
@@ -40,6 +56,8 @@ else()
   # Add ISMRMRD to search path for FFTW3
   set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${ISMRMRD_DIR}")
   find_package(FFTW3 COMPONENTS single double threads REQUIRED)
+  # message(FATAL_ERROR "FFTW3_FOUND: ${FFTW3_FOUND} ${FFTW3_INCLUDE_DIR} ${FFTW3_LIBRARIES} ${FFTW3_LIBRARY} ${FFTW3F_LIBRARY}")
+  
   ADD_SUBDIRECTORY(xGadgetron)
   set(SIRF_BUILT_WITH_ISMRMRD TRUE PARENT_SCOPE)
   set(ISMRMRD_VERSION ${ISMRMRD_VERSION} PARENT_SCOPE)
